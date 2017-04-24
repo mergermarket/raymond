@@ -1,7 +1,6 @@
 package raymond
 
 import (
-	"github.com/aymerick/raymond"
 	"testing"
 )
 
@@ -293,17 +292,29 @@ func TestRegisterHelper(t *testing.T) {
 
 		// register
 
+		errors := RegisterHelpers(firstHelpers)
+
+		if errors != nil {
+			t.Fatalf("did not expect RegisterHelpers to return errors on registering multiple helpers %v", errors)
+		}
+
 		secondHelpers := make(map[string]interface{})
-		firstHelpers["baz"] = func(name string, options *Options) SafeString {
+		secondHelpers["baz"] = func(name string, options *Options) SafeString {
 			return SafeString("banana")
 		}
-		firstHelpers["bar"] = func(name string, options *Options) SafeString {
+		secondHelpers["bar"] = func(name string, options *Options) SafeString {
 			return SafeString("apple")
 		}
 
-		// register
+		errors = RegisterHelpers(secondHelpers)
 
-		// check all 3 helpers are registered and one error
+		if errors == nil {
+			t.Fatalf("expect RegisterHelpers to return atleast one error in the list of errors on registering multiple helpers %v", errors)
+		}
+
+		if len(errors) != 1 {
+			t.Fatalf("expected 1 error but got %d", len(errors))
+		}
 
 	})
 }

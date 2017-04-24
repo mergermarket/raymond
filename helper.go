@@ -53,10 +53,16 @@ func RegisterHelper(name string, helper interface{}) (err error) {
 }
 
 // RegisterHelpers registers several global helpers. Those helpers will be available to all templates.
-func RegisterHelpers(helpers map[string]interface{}) {
+func RegisterHelpers(helpers map[string]interface{}) (errors []error) {
 	for name, helper := range helpers {
-		RegisterHelper(name, helper)
+		err := RegisterHelper(name, helper)
+
+		if err != nil {
+			errors = append(errors, err)
+		}
+
 	}
+	return
 }
 
 // ensureValidHelper panics if given helper is not valid
