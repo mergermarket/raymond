@@ -1,6 +1,9 @@
 package raymond
 
-import "testing"
+import (
+	"github.com/aymerick/raymond"
+	"testing"
+)
 
 const (
 	VERBOSE = false
@@ -258,4 +261,49 @@ func TestHelperCtx(t *testing.T) {
 	if result != "By namefile - Alan Johnson" {
 		t.Errorf("Failed to render template in helper: %q", result)
 	}
+}
+
+func TestRegisterHelper(t *testing.T) {
+	t.Run("RegisterHelper does not panic when re-registering, instead returns error", func(t *testing.T) {
+		err := RegisterHelper("template", func(name string, options *Options) SafeString {
+			return SafeString("banana")
+		})
+
+		if err != nil {
+			t.Fatalf("did not expect template to return error on first registration %v", err)
+		}
+
+		err = RegisterHelper("template", func(name string, options *Options) SafeString {
+			return SafeString("apple")
+		})
+
+		if err == nil {
+			t.Fatalf("expected an error when registering same template twice")
+		}
+	})
+
+	t.Run("RegisterHelpers does not panic when re-registering, instead returns an error", func(t *testing.T) {
+		firstHelpers := make(map[string]interface{})
+		firstHelpers["foo"] = func(name string, options *Options) SafeString {
+			return SafeString("banana")
+		}
+		firstHelpers["bar"] = func(name string, options *Options) SafeString {
+			return SafeString("apple")
+		}
+
+		// register
+
+		secondHelpers := make(map[string]interface{})
+		firstHelpers["baz"] = func(name string, options *Options) SafeString {
+			return SafeString("banana")
+		}
+		firstHelpers["bar"] = func(name string, options *Options) SafeString {
+			return SafeString("apple")
+		}
+
+		// register
+
+		// check all 3 helpers are registered and one error
+
+	})
 }
